@@ -4,9 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ReFoodLoop — Спасаем еду вместе</title>
+    <meta name="theme-color" content="#27AE60">
+    <meta name="description" content="Экономьте до 70% на качественных продуктах. Спасайте планету и свой бюджет!">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js"></script>
     <style>
         * {
             margin: 0;
@@ -19,6 +22,12 @@
             background: #f6f8f7;
             color: #333;
             line-height: 1.6;
+            opacity: 0;
+            animation: fadeIn 0.5s ease forwards;
+        }
+
+        @keyframes fadeIn {
+            to { opacity: 1; }
         }
 
         /* Цветовая схема */
@@ -28,6 +37,52 @@
             --blue: #3498DB;
             --dark-green: #219150;
             --light-green: #e8f5e8;
+        }
+
+        /* Preloader */
+        .preloader {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: white;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            transition: opacity 0.5s ease, visibility 0.5s ease;
+        }
+
+        .preloader.hidden {
+            opacity: 0;
+            visibility: hidden;
+        }
+
+        .preloader-spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid var(--light-green);
+            border-top: 5px solid var(--green);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .preloader h3 {
+            color: var(--green);
+            margin-bottom: 10px;
+            font-size: 1.5em;
+        }
+
+        .preloader p {
+            color: #666;
         }
 
         /* Шапка с градиентом */
@@ -817,9 +872,347 @@
             box-shadow: 0 5px 20px rgba(0,0,0,0.08);
             margin: 30px 0;
         }
+
+        /* Новые стили для добавленных функций */
+        .social-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .social-btn {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 0.9em;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .social-btn:hover {
+            transform: scale(1.1);
+        }
+
+        .social-fb { background: #3b5998; }
+        .social-vk { background: #4c75a3; }
+        .social-wa { background: #25D366; }
+        .social-tg { background: #0088cc; }
+
+        .delivery-options {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .delivery-option {
+            border: 2px solid var(--light-green);
+            border-radius: 15px;
+            padding: 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .delivery-option.selected {
+            border-color: var(--green);
+            background: var(--light-green);
+        }
+
+        .delivery-option:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .achievements-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 20px;
+            margin-top: 30px;
+        }
+
+        .achievement {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+            transition: all 0.3s ease;
+        }
+
+        .achievement.unlocked {
+            border: 2px solid var(--green);
+        }
+
+        .achievement.locked {
+            opacity: 0.6;
+            filter: grayscale(1);
+        }
+
+        .achievement-icon {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            color: var(--green);
+        }
+
+        .achievement.locked .achievement-icon {
+            color: #999;
+        }
+
+        .add-to-cart-animation {
+            position: fixed;
+            pointer-events: none;
+            z-index: 1002;
+            animation: flyToCart 0.8s ease-out forwards;
+        }
+
+        @keyframes flyToCart {
+            0% {
+                transform: scale(1) translate(0, 0);
+                opacity: 1;
+            }
+            100% {
+                transform: scale(0.2) translate(var(--end-x), var(--end-y));
+                opacity: 0;
+            }
+        }
+
+        .install-prompt {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 5px 25px rgba(0,0,0,0.15);
+            z-index: 1000;
+            max-width: 300px;
+            border: 2px solid var(--green);
+            animation: slideUp 0.5s ease;
+        }
+
+        @keyframes slideUp {
+            from { transform: translateY(100%); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .install-prompt.hidden {
+            display: none;
+        }
+
+        /* Стили для сканера штрих-кодов */
+        .scanner-section {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+            margin: 30px 0;
+            text-align: center;
+        }
+
+        .scanner-container {
+            position: relative;
+            max-width: 500px;
+            margin: 0 auto;
+        }
+
+        #scanner-video {
+            width: 100%;
+            height: 300px;
+            border-radius: 15px;
+            background: #000;
+            object-fit: cover;
+        }
+
+        .scanner-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border: 2px solid var(--green);
+            border-radius: 15px;
+            pointer-events: none;
+        }
+
+        .scanner-frame {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 200px;
+            height: 200px;
+            border: 3px solid var(--orange);
+            border-radius: 10px;
+            animation: pulse-frame 2s infinite;
+        }
+
+        @keyframes pulse-frame {
+            0% { border-color: var(--orange); }
+            50% { border-color: var(--green); }
+            100% { border-color: var(--orange); }
+        }
+
+        .scanner-controls {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+
+        .scanner-btn {
+            background: var(--green);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            padding: 12px 24px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 1em;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .scanner-btn:hover {
+            background: var(--dark-green);
+            transform: translateY(-2px);
+        }
+
+        .scanner-btn.secondary {
+            background: var(--blue);
+        }
+
+        .scanner-btn.secondary:hover {
+            background: #2980b9;
+        }
+
+        .scanner-btn.danger {
+            background: #e74c3c;
+        }
+
+        .scanner-btn.danger:hover {
+            background: #c0392b;
+        }
+
+        .scanner-results {
+            margin-top: 20px;
+            padding: 20px;
+            background: var(--light-green);
+            border-radius: 15px;
+            text-align: left;
+        }
+
+        .barcode-result {
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            border-left: 4px solid var(--green);
+        }
+
+        .scanner-status {
+            margin: 10px 0;
+            padding: 10px;
+            border-radius: 8px;
+            font-weight: 500;
+        }
+
+        .status-scanning {
+            background: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeaa7;
+        }
+
+        .status-success {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+
+        .status-error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .product-form-scanner {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            margin-top: 20px;
+            border: 2px solid var(--light-green);
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        @media (max-width: 768px) {
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+            
+            #scanner-video {
+                height: 250px;
+            }
+            
+            .scanner-frame {
+                width: 150px;
+                height: 150px;
+            }
+        }
+
+        .order-history {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+            margin: 30px 0;
+        }
+
+        .order-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 0;
+            border-bottom: 1px solid #eee;
+        }
+
+        .order-item:last-child {
+            border-bottom: none;
+        }
+
+        .order-status {
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-size: 0.8em;
+            font-weight: bold;
+        }
+
+        .status-completed { background: var(--light-green); color: var(--green); }
+        .status-pending { background: #fff3cd; color: #856404; }
+        .status-cancelled { background: #f8d7da; color: #721c24; }
     </style>
 </head>
 <body>
+    <!-- Preloader -->
+    <div class="preloader" id="preloader">
+        <div class="preloader-spinner"></div>
+        <h3>ReFoodLoop</h3>
+        <p>Загружаем вкусные скидки...</p>
+    </div>
+
     <!-- Главный экран -->
     <header>
         <div class="logo-container">
@@ -841,6 +1234,8 @@
             <a href="#how-it-works"><i class="fas fa-play-circle"></i> <span>Как это работает</span></a>
             <a href="#products"><i class="fas fa-shopping-bag"></i> <span>Товары</span></a>
             <a href="#map-section"><i class="fas fa-map-marker-alt"></i> <span>Карта</span></a>
+            <a href="#order-history"><i class="fas fa-history"></i> <span>История</span></a>
+            <a href="#achievements"><i class="fas fa-trophy"></i> <span>Достижения</span></a>
             <a href="#partner-scanner"><i class="fas fa-qrcode"></i> <span>Для партнеров</span></a>
             <a href="#auth"><i class="fas fa-user-plus"></i> <span>Регистрация</span></a>
             <div class="user-menu">
@@ -958,9 +1353,29 @@
         </div>
     </section>
 
+    <!-- История заказов -->
+    <section id="order-history">
+        <h2>История заказов</h2>
+        <div class="order-history">
+            <div id="order-list">
+                <!-- Заказы будут загружены через JavaScript -->
+            </div>
+        </div>
+    </section>
+
+    <!-- Достижения -->
+    <section id="achievements">
+        <h2>Ваши достижения</h2>
+        <div class="achievements-grid" id="achievements-list">
+            <!-- Достижения будут загружены через JavaScript -->
+        </div>
+    </section>
+
     <!-- Для партнеров -->
     <section id="partner-scanner">
         <h2>Для партнеров</h2>
+        
+        <!-- Панель управления -->
         <div class="partner-dashboard">
             <h3 style="color: var(--green); margin-bottom: 20px;">📦 Панель управления</h3>
             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px;">
@@ -977,11 +1392,100 @@
                     <span class="eco-label">Эффективность</span>
                 </div>
             </div>
+        </div>
+
+        <!-- Сканер штрих-кодов -->
+        <div class="scanner-section">
+            <h3 style="color: var(--green); margin-bottom: 20px;">📷 Сканер штрих-кодов</h3>
+            <p>Отсканируйте штрих-код товара для быстрого добавления</p>
             
-            <div style="margin-top: 30px; text-align: center;">
-                <button class="btn" onclick="showNotification('Функция добавления товара активирована')">
-                    <i class="fas fa-plus"></i> Добавить товар
+            <div class="scanner-container">
+                <video id="scanner-video" muted playsinline></video>
+                <div class="scanner-overlay">
+                    <div class="scanner-frame"></div>
+                </div>
+            </div>
+
+            <div class="scanner-status" id="scanner-status">
+                Готов к сканированию
+            </div>
+
+            <div class="scanner-controls">
+                <button class="scanner-btn" onclick="startScanner()" id="start-scanner">
+                    <i class="fas fa-camera"></i> Запустить сканер
                 </button>
+                <button class="scanner-btn secondary" onclick="stopScanner()" id="stop-scanner" disabled>
+                    <i class="fas fa-stop"></i> Остановить
+                </button>
+                <button class="scanner-btn danger" onclick="clearScannerResults()">
+                    <i class="fas fa-trash"></i> Очистить
+                </button>
+            </div>
+
+            <div class="scanner-results" id="scanner-results" style="display: none;">
+                <h4>Результаты сканирования:</h4>
+                <div id="barcode-results"></div>
+            </div>
+        </div>
+
+        <!-- Форма добавления товара -->
+        <div class="product-form-scanner">
+            <h4 style="color: var(--green); margin-bottom: 15px;">➕ Добавить новый товар</h4>
+            <form id="add-product-form">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="product-barcode"><i class="fas fa-barcode"></i> Штрих-код</label>
+                        <input type="text" id="product-barcode" placeholder="Отсканируйте или введите вручную">
+                    </div>
+                    <div class="form-group">
+                        <label for="product-name"><i class="fas fa-tag"></i> Название товара</label>
+                        <input type="text" id="product-name" required placeholder="Например: Булочка с маком">
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="product-price"><i class="fas fa-money-bill-wave"></i> Цена (₸)</label>
+                        <input type="number" id="product-price" required placeholder="1000">
+                    </div>
+                    <div class="form-group">
+                        <label for="product-expires"><i class="fas fa-clock"></i> Срок годности (дни)</label>
+                        <input type="number" id="product-expires" required placeholder="3" min="1" max="30">
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="product-category"><i class="fas fa-list"></i> Категория</label>
+                        <select id="product-category" required>
+                            <option value="">Выберите категорию</option>
+                            <option value="bakery">Пекарня</option>
+                            <option value="cafe">Кафе</option>
+                            <option value="store">Магазин</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="product-stock"><i class="fas fa-boxes"></i> Количество</label>
+                        <input type="number" id="product-stock" required placeholder="10" min="1" max="100">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="product-image"><i class="fas fa-image"></i> Ссылка на изображение</label>
+                    <input type="url" id="product-image" placeholder="https://example.com/image.jpg">
+                </div>
+
+                <button type="submit" class="btn btn-block">
+                    <i class="fas fa-plus-circle"></i> Добавить товар
+                </button>
+            </form>
+        </div>
+
+        <!-- Список добавленных товаров -->
+        <div class="partner-products" style="margin-top: 30px;">
+            <h4 style="color: var(--green); margin-bottom: 15px;">📋 Ваши товары</h4>
+            <div id="partner-products-list" class="products-grid">
+                <!-- Товары партнера будут загружены здесь -->
             </div>
         </div>
     </section>
@@ -1080,6 +1584,24 @@
             <span class="close-modal" onclick="closeModal('cart-modal')">&times;</span>
             <h3>🛒 Ваша корзина</h3>
             <div id="cart-items"></div>
+            
+            <!-- Опции доставки -->
+            <div style="margin-top: 20px;">
+                <h4>Способ получения</h4>
+                <div class="delivery-options">
+                    <div class="delivery-option selected" onclick="selectDeliveryOption(this, 'pickup')">
+                        <i class="fas fa-store" style="font-size: 2em; color: var(--green); margin-bottom: 10px;"></i>
+                        <h4>Самовывоз</h4>
+                        <p>Бесплатно</p>
+                    </div>
+                    <div class="delivery-option" onclick="selectDeliveryOption(this, 'delivery')">
+                        <i class="fas fa-motorcycle" style="font-size: 2em; color: var(--blue); margin-bottom: 10px;"></i>
+                        <h4>Доставка</h4>
+                        <p>500 ₸</p>
+                    </div>
+                </div>
+            </div>
+            
             <div class="cart-total" style="margin-top: 20px; padding-top: 20px; border-top: 2px solid var(--light-green);">
                 <strong style="font-size: 1.2em;">Итого: <span id="cart-total">0</span> ₸</strong>
             </div>
@@ -1114,6 +1636,18 @@
         </div>
     </div>
 
+    <!-- Установка PWA -->
+    <div class="install-prompt hidden" id="install-prompt">
+        <h4>Установить ReFoodLoop</h4>
+        <p>Установите приложение для быстрого доступа к скидкам</p>
+        <button class="btn" onclick="installApp()" style="margin-top: 10px;">
+            <i class="fas fa-download"></i> Установить
+        </button>
+        <button class="btn btn-secondary" onclick="closeInstallPrompt()" style="margin-top: 5px;">
+            Позже
+        </button>
+    </div>
+
     <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
     <script>
         // ==================== ГЛОБАЛЬНЫЕ ПЕРЕМЕННЫЕ ====================
@@ -1122,83 +1656,218 @@
         let userEcoStats = JSON.parse(localStorage.getItem('userEcoStats')) || { 
             savedKg: 0, savedCo2: 0, savedMoney: 0, mealsSaved: 0 
         };
+        let orderHistory = JSON.parse(localStorage.getItem('orderHistory')) || [];
+        let achievements = JSON.parse(localStorage.getItem('achievements')) || [];
+        let partnerProducts = JSON.parse(localStorage.getItem('partnerProducts')) || [];
+        let selectedDelivery = 'pickup';
+        let deferredPrompt;
+
+        // Переменные для сканера
+        let scannerActive = false;
+        let scannerStream = null;
+        let scannerCanvas = null;
+        let scannerContext = null;
+        let scannedBarcodes = new Set();
 
         // ==================== ИНИЦИАЛИЗАЦИЯ ДАННЫХ ====================
         function initializeProducts() {
             products = [
                 {
-                    id: 1, name: "Булочка с маком", price: 400, expiresIn: 1,
-                    img: "https://images.unsplash.com/photo-1608198093002-ad4e005484ec?w=400", category: "bakery",
-                    location: { lat: 43.238, lng: 76.882 }, stock: 8, rating: 4.5, reviews: 23, isHot: true,
-                    saleEnds: Date.now() + 2 * 60 * 60 * 1000, weight: 0.1
+                    id: 1, 
+                    name: "Булочка с маком", 
+                    price: 400, 
+                    expiresIn: 1,
+                    img: "https://i.pinimg.com/originals/9f/54/7a/9f547a993482f94e13f4657fde7a79b2.jpg", 
+                    category: "bakery",
+                    location: { lat: 43.238, lng: 76.882 }, 
+                    stock: 8, 
+                    rating: 4.5, 
+                    reviews: 23, 
+                    isHot: true,
+                    saleEnds: Date.now() + 2 * 60 * 60 * 1000, 
+                    weight: 0.1
                 },
                 {
-                    id: 2, name: "Хлеб цельнозерновой", price: 500, expiresIn: 2,
-                    img: "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=400", category: "bakery",
-                    location: { lat: 43.242, lng: 76.888 }, stock: 15, rating: 4.2, reviews: 18, isHot: false,
-                    saleEnds: Date.now() + 6 * 60 * 60 * 1000, weight: 0.5
+                    id: 2, 
+                    name: "Хлеб цельнозерновой", 
+                    price: 500, 
+                    expiresIn: 2,
+                    img: "https://cdn.lentochka.lenta.com/resample/webp/900x900/photo/515660/f0c08c9e0e0e8e8e.png", 
+                    category: "bakery",
+                    location: { lat: 43.242, lng: 76.888 }, 
+                    stock: 15, 
+                    rating: 4.2, 
+                    reviews: 18, 
+                    isHot: false,
+                    saleEnds: Date.now() + 6 * 60 * 60 * 1000, 
+                    weight: 0.5
                 },
                 {
-                    id: 3, name: "Пирог с ягодами", price: 1000, expiresIn: 3,
-                    img: "https://images.unsplash.com/photo-1617196035055-f9cba9d1d1d5?w=400", category: "cafe",
-                    location: { lat: 43.235, lng: 76.885 }, stock: 5, rating: 4.8, reviews: 31, isHot: true,
-                    saleEnds: Date.now() + 4 * 60 * 60 * 1000, weight: 0.3
+                    id: 3, 
+                    name: "Пирог с ягодами", 
+                    price: 1000, 
+                    expiresIn: 3,
+                    img: "https://i.pinimg.com/736x/18/0e/93/180e93af57414ba27214f0059c99fa7c.jpg", 
+                    category: "cafe",
+                    location: { lat: 43.235, lng: 76.885 }, 
+                    stock: 5, 
+                    rating: 4.8, 
+                    reviews: 31, 
+                    isHot: true,
+                    saleEnds: Date.now() + 4 * 60 * 60 * 1000, 
+                    weight: 0.3
                 },
                 {
-                    id: 4, name: "Круассан с шоколадом", price: 350, expiresIn: 1,
-                    img: "https://images.unsplash.com/photo-1555507032-6f2e6f5eda5a?w=400", category: "bakery",
-                    location: { lat: 43.240, lng: 76.890 }, stock: 12, rating: 4.6, reviews: 42, isHot: true,
-                    saleEnds: Date.now() + 3 * 60 * 60 * 1000, weight: 0.1
+                    id: 4, 
+                    name: "Круассан с шоколадом", 
+                    price: 350, 
+                    expiresIn: 1,
+                    img: "https://i.pinimg.com/originals/76/e5/af/76e5afbee7a247ecd64c59a39bfb45a1.jpg", 
+                    category: "bakery",
+                    location: { lat: 43.240, lng: 76.890 }, 
+                    stock: 12, 
+                    rating: 4.6, 
+                    reviews: 42, 
+                    isHot: true,
+                    saleEnds: Date.now() + 3 * 60 * 60 * 1000, 
+                    weight: 0.1
                 },
                 {
-                    id: 5, name: "Свежие овощи", price: 800, expiresIn: 1,
-                    img: "https://images.unsplash.com/photo-1540420773420-3366772f4999?w=400", category: "store",
-                    location: { lat: 43.245, lng: 76.895 }, stock: 20, rating: 4.3, reviews: 27, isHot: false,
-                    saleEnds: Date.now() + 8 * 60 * 60 * 1000, weight: 1.0
+                    id: 5, 
+                    name: "Свежие овощи", 
+                    price: 800, 
+                    expiresIn: 1,
+                    img: "https://images.unsplash.com/photo-1540420773420-3366772f4999?w=400", 
+                    category: "store",
+                    location: { lat: 43.245, lng: 76.895 }, 
+                    stock: 20, 
+                    rating: 4.3, 
+                    reviews: 27, 
+                    isHot: false,
+                    saleEnds: Date.now() + 8 * 60 * 60 * 1000, 
+                    weight: 1.0
                 },
                 {
-                    id: 6, name: "Молочные продукты", price: 1200, expiresIn: 2,
-                    img: "https://images.unsplash.com/photo-1563636619-e9143da7973b?w=400", category: "store",
-                    location: { lat: 43.238, lng: 76.892 }, stock: 10, rating: 4.4, reviews: 35, isHot: false,
-                    saleEnds: Date.now() + 5 * 60 * 60 * 1000, weight: 1.0
+                    id: 6, 
+                    name: "Молочные продукты", 
+                    price: 1200, 
+                    expiresIn: 2,
+                    img: "https://i.pinimg.com/originals/86/9f/56/869f569282f469f6e0ca5daa2be9a3d6.jpg", 
+                    category: "store",
+                    location: { lat: 43.238, lng: 76.892 }, 
+                    stock: 10, 
+                    rating: 4.4, 
+                    reviews: 35, 
+                    isHot: false,
+                    saleEnds: Date.now() + 5 * 60 * 60 * 1000, 
+                    weight: 1.0
                 },
                 {
-                    id: 7, name: "Сэндвичи", price: 600, expiresIn: 1,
-                    img: "https://images.unsplash.com/photo-1567234669003-dce7a7a88821?w=400", category: "cafe",
-                    location: { lat: 43.232, lng: 76.878 }, stock: 7, rating: 4.7, reviews: 29, isHot: true,
-                    saleEnds: Date.now() + 2 * 60 * 60 * 1000, weight: 0.2
+                    id: 7, 
+                    name: "Сэндвичи", 
+                    price: 600, 
+                    expiresIn: 1,
+                    img: "https://images.unsplash.com/photo-1567234669003-dce7a7a88821?w=400", 
+                    category: "cafe",
+                    location: { lat: 43.232, lng: 76.878 }, 
+                    stock: 7, 
+                    rating: 4.7, 
+                    reviews: 29, 
+                    isHot: true,
+                    saleEnds: Date.now() + 2 * 60 * 60 * 1000, 
+                    weight: 0.2
                 },
                 {
-                    id: 8, name: "Фруктовый торт", price: 1500, expiresIn: 2,
-                    img: "https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=400", category: "bakery",
-                    location: { lat: 43.236, lng: 76.880 }, stock: 3, rating: 4.9, reviews: 51, isHot: true,
-                    saleEnds: Date.now() + 1 * 60 * 60 * 1000, weight: 0.5
+                    id: 8, 
+                    name: "Фруктовый торт", 
+                    price: 1500, 
+                    expiresIn: 2,
+                    img: "https://avatars.dzeninfra.ru/get-zen_doc/271828/pub_68aaac273c66fa10b10bff9f_68aaaf63844f0723314f4506/scale_1200", 
+                    category: "bakery",
+                    location: { lat: 43.236, lng: 76.880 }, 
+                    stock: 3, 
+                    rating: 4.9, 
+                    reviews: 51, 
+                    isHot: true,
+                    saleEnds: Date.now() + 1 * 60 * 60 * 1000, 
+                    weight: 0.5
                 },
                 {
-                    id: 9, name: "Салат Цезарь", price: 900, expiresIn: 1,
-                    img: "https://images.unsplash.com/photo-1546793665-c74683f339c1?w=400", category: "cafe",
-                    location: { lat: 43.234, lng: 76.882 }, stock: 6, rating: 4.5, reviews: 38, isHot: false,
-                    saleEnds: Date.now() + 4 * 60 * 60 * 1000, weight: 0.3
+                    id: 9, 
+                    name: "Салат Цезарь", 
+                    price: 900, 
+                    expiresIn: 1,
+                    img: "https://avatars.mds.yandex.net/get-entity_search/2304479/1190323343/S600xU_2x", 
+                    category: "cafe",
+                    location: { lat: 43.234, lng: 76.882 }, 
+                    stock: 6, 
+                    rating: 4.5, 
+                    reviews: 38, 
+                    isHot: false,
+                    saleEnds: Date.now() + 4 * 60 * 60 * 1000, 
+                    weight: 0.3
                 },
                 {
-                    id: 10, name: "Сырная тарелка", price: 1100, expiresIn: 3,
-                    img: "https://images.unsplash.com/photo-1561336315-1c04f15f12c9?w=400", category: "cafe",
-                    location: { lat: 43.239, lng: 76.886 }, stock: 4, rating: 4.6, reviews: 22, isHot: false,
-                    saleEnds: Date.now() + 7 * 60 * 60 * 1000, weight: 0.2
+                    id: 10, 
+                    name: "Сырная тарелка", 
+                    price: 1100, 
+                    expiresIn: 3,
+                    img: "https://айвай.рф/media/zoo/images/1_4bdda38edaad44cd35c207cda141aabe.jpg", 
+                    category: "cafe",
+                    location: { lat: 43.239, lng: 76.886 }, 
+                    stock: 4, 
+                    rating: 4.6, 
+                    reviews: 22, 
+                    isHot: false,
+                    saleEnds: Date.now() + 7 * 60 * 60 * 1000, 
+                    weight: 0.2
                 },
                 {
-                    id: 11, name: "Свежевыжатый сок", price: 450, expiresIn: 1,
-                    img: "https://images.unsplash.com/photo-1613478223719-2ab802602423?w=400", category: "cafe",
-                    location: { lat: 43.241, lng: 76.884 }, stock: 15, rating: 4.8, reviews: 47, isHot: true,
-                    saleEnds: Date.now() + 2 * 60 * 60 * 1000, weight: 0.3
+                    id: 11, 
+                    name: "Свежевыжатый сок", 
+                    price: 450, 
+                    expiresIn: 1,
+                    img: "https://images.unsplash.com/photo-1613478223719-2ab802602423?w=400", 
+                    category: "cafe",
+                    location: { lat: 43.241, lng: 76.884 }, 
+                    stock: 15, 
+                    rating: 4.8, 
+                    reviews: 47, 
+                    isHot: true,
+                    saleEnds: Date.now() + 2 * 60 * 60 * 1000, 
+                    weight: 0.3
                 },
                 {
-                    id: 12, name: "Консервированные продукты", price: 700, expiresIn: 30,
-                    img: "https://images.unsplash.com/photo-1586201375761-83865001e31c?w=400", category: "store",
-                    location: { lat: 43.243, lng: 76.889 }, stock: 25, rating: 4.2, reviews: 19, isHot: false,
-                    saleEnds: Date.now() + 24 * 60 * 60 * 1000, weight: 0.4
+                    id: 12, 
+                    name: "Консервированные продукты", 
+                    price: 700, 
+                    expiresIn: 30,
+                    img: "https://selhozproduct.ru/upload/usl/f_67c6fc568cd54.jpg", 
+                    category: "store",
+                    location: { lat: 43.243, lng: 76.889 }, 
+                    stock: 25, 
+                    rating: 4.2, 
+                    reviews: 19, 
+                    isHot: false,
+                    saleEnds: Date.now() + 24 * 60 * 60 * 1000, 
+                    weight: 0.4
                 }
             ];
+        }
+
+        // Инициализация достижений
+        function initializeAchievements() {
+            if (achievements.length === 0) {
+                achievements = [
+                    { id: 1, name: "Первая покупка", description: "Совершите первую покупку", icon: "fas fa-shopping-bag", unlocked: false },
+                    { id: 2, name: "Эко-герой", description: "Спасите 5 кг еды", icon: "fas fa-leaf", unlocked: false },
+                    { id: 3, name: "Экономист", description: "Сэкономьте 5000 ₸", icon: "fas fa-piggy-bank", unlocked: false },
+                    { id: 4, name: "Постоянный клиент", description: "Совершите 10 покупок", icon: "fas fa-star", unlocked: false },
+                    { id: 5, name: "Социальный активист", description: "Поделитесь с друзьями", icon: "fas fa-share-alt", unlocked: false },
+                    { id: 6, name: "Гурман", description: "Попробуйте товары из 5 разных категорий", icon: "fas fa-utensils", unlocked: false }
+                ];
+                localStorage.setItem('achievements', JSON.stringify(achievements));
+            }
         }
 
         // ==================== ОСНОВНЫЕ ФУНКЦИИ ====================
@@ -1244,7 +1913,7 @@
                 container.innerHTML += `
                     <div class="product ${product.isHot ? 'hot-deal' : ''}" data-category="${product.category}">
                         ${product.isHot ? '<div class="hot-badge"><i class="fas fa-fire"></i> HOT</div>' : ''}
-                        <img src="${product.img}" alt="${product.name}">
+                        <img src="${product.img}" alt="${product.name}" onerror="this.src='https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=400'">
                         <div class="category">${getCategoryName(product.category)}</div>
                         <h3>${product.name}</h3>
                         <div class="rating">
@@ -1266,12 +1935,68 @@
                             <div class="stock-progress-bar ${stockPercentage < 30 ? 'low' : ''}" style="width: ${stockPercentage}%"></div>
                         </div>
                         <div class="stock-info">Осталось: ${product.stock} шт.</div>
-                        <button class="btn" onclick="addToCart(${product.id})">
+                        <button class="btn" onclick="addToCartWithAnimation(${product.id}, this)">
                             <i class="fas fa-cart-plus"></i> Добавить в корзину
                         </button>
+                        <div class="social-buttons">
+                            <div class="social-btn social-fb" onclick="shareProduct(${product.id}, 'facebook')">
+                                <i class="fab fa-facebook-f"></i>
+                            </div>
+                            <div class="social-btn social-vk" onclick="shareProduct(${product.id}, 'vk')">
+                                <i class="fab fa-vk"></i>
+                            </div>
+                            <div class="social-btn social-wa" onclick="shareProduct(${product.id}, 'whatsapp')">
+                                <i class="fab fa-whatsapp"></i>
+                            </div>
+                            <div class="social-btn social-tg" onclick="shareProduct(${product.id}, 'telegram')">
+                                <i class="fab fa-telegram-plane"></i>
+                            </div>
+                        </div>
                     </div>
                 `;
             });
+        }
+
+        // Анимированное добавление в корзину
+        function addToCartWithAnimation(productId, button) {
+            const product = products.find(p => p.id === productId);
+            if (!product) return;
+            
+            // Создаем анимированный элемент
+            const animationElement = document.createElement('div');
+            animationElement.className = 'add-to-cart-animation';
+            animationElement.innerHTML = `<img src="${product.img}" style="width: 50px; height: 50px; border-radius: 10px; object-fit: cover;">`;
+            
+            // Получаем позиции элементов
+            const buttonRect = button.getBoundingClientRect();
+            const cartIcon = document.querySelector('.cart-icon');
+            const cartRect = cartIcon.getBoundingClientRect();
+            
+            // Устанавливаем начальную позицию
+            animationElement.style.position = 'fixed';
+            animationElement.style.left = `${buttonRect.left + buttonRect.width/2 - 25}px`;
+            animationElement.style.top = `${buttonRect.top + buttonRect.height/2 - 25}px`;
+            
+            // Устанавливаем конечную позицию
+            const endX = cartRect.left + cartRect.width/2 - (buttonRect.left + buttonRect.width/2);
+            const endY = cartRect.top + cartRect.height/2 - (buttonRect.top + buttonRect.height/2);
+            
+            animationElement.style.setProperty('--end-x', `${endX}px`);
+            animationElement.style.setProperty('--end-y', `${endY}px`);
+            
+            document.body.appendChild(animationElement);
+            
+            // Добавляем товар в корзину после небольшой задержки
+            setTimeout(() => {
+                addToCart(productId);
+            }, 300);
+            
+            // Удаляем анимированный элемент после завершения анимации
+            setTimeout(() => {
+                if (animationElement.parentNode) {
+                    document.body.removeChild(animationElement);
+                }
+            }, 800);
         }
 
         // Функция добавления в корзину
@@ -1298,7 +2023,7 @@
             }
             
             updateCart();
-            showNotification(`"${product.name}" добавлен в корзину! 🛒`);
+            checkAchievements();
         }
 
         // Функция обновления корзины
@@ -1332,6 +2057,17 @@
                     </div>
                 `;
             });
+            
+            // Добавляем стоимость доставки
+            if (selectedDelivery === 'delivery') {
+                total += 500;
+                cartItems.innerHTML += `
+                    <div style="display: flex; justify-content: space-between; margin-top: 10px; padding-top: 10px; border-top: 1px solid #eee;">
+                        <div>Доставка</div>
+                        <div>500 ₸</div>
+                    </div>
+                `;
+            }
             
             cartTotal.textContent = total;
             
@@ -1389,6 +2125,16 @@
             document.getElementById(modalId).style.display = 'none';
         }
 
+        // Выбор способа доставки
+        function selectDeliveryOption(element, type) {
+            document.querySelectorAll('.delivery-option').forEach(opt => {
+                opt.classList.remove('selected');
+            });
+            element.classList.add('selected');
+            selectedDelivery = type;
+            updateCart();
+        }
+
         // Функция оформления заказа
         function checkout() {
             if (cart.length === 0) {
@@ -1396,57 +2142,487 @@
                 return;
             }
             
-            const total = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+            const total = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0) + (selectedDelivery === 'delivery' ? 500 : 0);
+            
+            // Создаем новый заказ
+            const newOrder = {
+                id: Date.now(),
+                date: new Date().toLocaleDateString('ru-RU'),
+                items: [...cart],
+                total: total,
+                status: 'completed',
+                delivery: selectedDelivery
+            };
+            
+            orderHistory.unshift(newOrder);
+            localStorage.setItem('orderHistory', JSON.stringify(orderHistory));
+            
             showNotification(`Заказ оформлен! Сумма: ${total} ₸ 🎉`);
             
             // Очищаем корзину
             cart = [];
             updateCart();
             closeModal('cart-modal');
+            
+            // Обновляем историю заказов
+            renderOrderHistory();
+            
+            // Проверяем достижения
+            checkAchievements();
         }
 
-        // Инициализация карты
-        function initMap() {
-            const map = L.map('map').setView([43.238, 76.882], 12);
+        // Отрисовка истории заказов
+        function renderOrderHistory() {
+            const container = document.getElementById('order-list');
+            container.innerHTML = '';
             
-            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                attribution: '© OpenStreetMap contributors'
-            }).addTo(map);
+            if (orderHistory.length === 0) {
+                container.innerHTML = '<p style="text-align: center; color: #666;">У вас пока нет заказов</p>';
+                return;
+            }
             
-            // Добавляем маркеры для каждого продукта
-            products.forEach(product => {
+            orderHistory.forEach(order => {
+                const statusClass = `status-${order.status}`;
+                const deliveryText = order.delivery === 'delivery' ? 'Доставка' : 'Самовывоз';
+                
+                container.innerHTML += `
+                    <div class="order-item">
+                        <div>
+                            <div style="font-weight: bold;">Заказ #${order.id}</div>
+                            <div style="color: #666; font-size: 0.9em;">${order.date} • ${deliveryText}</div>
+                        </div>
+                        <div style="text-align: right;">
+                            <div style="font-weight: bold;">${order.total} ₸</div>
+                            <div class="order-status ${statusClass}">${order.status === 'completed' ? 'Выполнен' : order.status === 'pending' ? 'В обработке' : 'Отменен'}</div>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        // Отрисовка достижений
+        function renderAchievements() {
+            const container = document.getElementById('achievements-list');
+            container.innerHTML = '';
+            
+            achievements.forEach(achievement => {
+                const achievementClass = achievement.unlocked ? 'unlocked' : 'locked';
+                
+                container.innerHTML += `
+                    <div class="achievement ${achievementClass}">
+                        <div class="achievement-icon">
+                            <i class="${achievement.icon}"></i>
+                        </div>
+                        <h4>${achievement.name}</h4>
+                        <p>${achievement.description}</p>
+                    </div>
+                `;
+            });
+        }
+
+        // Проверка достижений
+        function checkAchievements() {
+            let updated = false;
+            
+            // Первая покупка
+            if (orderHistory.length > 0 && !achievements[0].unlocked) {
+                achievements[0].unlocked = true;
+                showNotification('🎉 Получено достижение: Первая покупка!');
+                updated = true;
+            }
+            
+            // Эко-герой (5 кг спасенной еды)
+            if (userEcoStats.savedKg >= 5 && !achievements[1].unlocked) {
+                achievements[1].unlocked = true;
+                showNotification('🎉 Получено достижение: Эко-герой!');
+                updated = true;
+            }
+            
+            // Экономист (5000 ₸ сэкономлено)
+            if (userEcoStats.savedMoney >= 5000 && !achievements[2].unlocked) {
+                achievements[2].unlocked = true;
+                showNotification('🎉 Получено достижение: Экономист!');
+                updated = true;
+            }
+            
+            // Постоянный клиент (10 покупок)
+            if (orderHistory.length >= 10 && !achievements[3].unlocked) {
+                achievements[3].unlocked = true;
+                showNotification('🎉 Получено достижение: Постоянный клиент!');
+                updated = true;
+            }
+            
+            if (updated) {
+                localStorage.setItem('achievements', JSON.stringify(achievements));
+                renderAchievements();
+            }
+        }
+
+        // Поделиться товаром
+        function shareProduct(productId, platform) {
+            const product = products.find(p => p.id === productId);
+            if (!product) return;
+            
+            const discount = calculateDiscount(product.expiresIn);
+            const newPrice = Math.round(product.price * (1 - discount));
+            const message = `Смотри какая выгодная покупка! ${product.name} всего за ${newPrice} ₸ вместо ${product.price} ₸ на ReFoodLoop!`;
+            const url = window.location.href;
+            
+            let shareUrl = '';
+            
+            switch(platform) {
+                case 'facebook':
+                    shareUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}&quote=${encodeURIComponent(message)}`;
+                    break;
+                case 'vk':
+                    shareUrl = `https://vk.com/share.php?url=${encodeURIComponent(url)}&title=${encodeURIComponent(message)}`;
+                    break;
+                case 'whatsapp':
+                    shareUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(message + ' ' + url)}`;
+                    break;
+                case 'telegram':
+                    shareUrl = `https://t.me/share/url?url=${encodeURIComponent(url)}&text=${encodeURIComponent(message)}`;
+                    break;
+            }
+            
+            if (shareUrl) {
+                window.open(shareUrl, '_blank', 'width=600,height=400');
+                
+                // Разблокируем достижение "Социальный активист"
+                if (!achievements[4].unlocked) {
+                    achievements[4].unlocked = true;
+                    localStorage.setItem('achievements', JSON.stringify(achievements));
+                    renderAchievements();
+                    showNotification('🎉 Получено достижение: Социальный активист!');
+                }
+            }
+        }
+
+        // ==================== ФУНКЦИИ СКАНЕРА ШТРИХ-КОДОВ ====================
+
+        // Запуск сканера
+        async function startScanner() {
+            try {
+                const statusElement = document.getElementById('scanner-status');
+                statusElement.textContent = 'Запрос доступа к камере...';
+                statusElement.className = 'scanner-status status-scanning';
+
+                // Запрашиваем доступ к камере
+                scannerStream = await navigator.mediaDevices.getUserMedia({ 
+                    video: { 
+                        facingMode: 'environment',
+                        width: { ideal: 1280 },
+                        height: { ideal: 720 }
+                    } 
+                });
+
+                const videoElement = document.getElementById('scanner-video');
+                videoElement.srcObject = scannerStream;
+                
+                // Ждем загрузки видео
+                videoElement.onloadedmetadata = () => {
+                    videoElement.play();
+                    scannerActive = true;
+                    
+                    statusElement.textContent = 'Сканирование... Наведите на штрих-код';
+                    
+                    // Активируем кнопки
+                    document.getElementById('start-scanner').disabled = true;
+                    document.getElementById('stop-scanner').disabled = false;
+                    
+                    // Создаем canvas для анализа кадров
+                    scannerCanvas = document.createElement('canvas');
+                    scannerContext = scannerCanvas.getContext('2d');
+                    
+                    // Запускаем обработку кадров
+                    processScannerFrame();
+                };
+
+            } catch (error) {
+                console.error('Ошибка доступа к камере:', error);
+                document.getElementById('scanner-status').textContent = 'Ошибка: Не удалось получить доступ к камере';
+                document.getElementById('scanner-status').className = 'scanner-status status-error';
+            }
+        }
+
+        // Остановка сканера
+        function stopScanner() {
+            scannerActive = false;
+            
+            if (scannerStream) {
+                scannerStream.getTracks().forEach(track => track.stop());
+                scannerStream = null;
+            }
+            
+            const videoElement = document.getElementById('scanner-video');
+            videoElement.srcObject = null;
+            
+            document.getElementById('start-scanner').disabled = false;
+            document.getElementById('stop-scanner').disabled = true;
+            
+            document.getElementById('scanner-status').textContent = 'Сканер остановлен';
+            document.getElementById('scanner-status').className = 'scanner-status';
+        }
+
+        // Обработка кадров сканера
+        function processScannerFrame() {
+            if (!scannerActive) return;
+
+            const videoElement = document.getElementById('scanner-video');
+            const statusElement = document.getElementById('scanner-status');
+
+            if (videoElement.readyState === videoElement.HAVE_ENOUGH_DATA) {
+                // Устанавливаем размер canvas равным видео
+                scannerCanvas.width = videoElement.videoWidth;
+                scannerCanvas.height = videoElement.videoHeight;
+                
+                // Рисуем текущий кадр видео на canvas
+                scannerContext.drawImage(videoElement, 0, 0, scannerCanvas.width, scannerCanvas.height);
+                
+                // Получаем данные изображения для анализа
+                const imageData = scannerContext.getImageData(0, 0, scannerCanvas.width, scannerCanvas.height);
+                
+                // Используем jsQR для распознавания QR-кодов и штрих-кодов
+                const code = jsQR(imageData.data, imageData.width, imageData.height, {
+                    inversionAttempts: "dontInvert",
+                });
+                
+                if (code) {
+                    const barcode = code.data;
+                    
+                    // Проверяем, не сканировали ли мы уже этот код
+                    if (!scannedBarcodes.has(barcode)) {
+                        scannedBarcodes.add(barcode);
+                        handleScannedBarcode(barcode);
+                        
+                        statusElement.textContent = `Найден штрих-код: ${barcode}`;
+                        statusElement.className = 'scanner-status status-success';
+                        
+                        // Временно останавливаем сканер после успешного сканирования
+                        setTimeout(() => {
+                            if (scannerActive) {
+                                statusElement.textContent = 'Сканирование... Наведите на штрих-код';
+                                statusElement.className = 'scanner-status status-scanning';
+                            }
+                        }, 2000);
+                    }
+                }
+            }
+
+            // Продолжаем обработку кадров
+            if (scannerActive) {
+                requestAnimationFrame(processScannerFrame);
+            }
+        }
+
+        // Обработка отсканированного штрих-кода
+        function handleScannedBarcode(barcode) {
+            // Показываем результаты
+            const resultsContainer = document.getElementById('scanner-results');
+            resultsContainer.style.display = 'block';
+            
+            // Добавляем результат в список
+            const resultsList = document.getElementById('barcode-results');
+            const resultElement = document.createElement('div');
+            resultElement.className = 'barcode-result';
+            resultElement.innerHTML = `
+                <strong>Штрих-код:</strong> ${barcode}
+                <button class="scanner-btn secondary" onclick="useBarcode('${barcode}')" style="margin-left: 10px; padding: 5px 10px;">
+                    <i class="fas fa-check"></i> Использовать
+                </button>
+            `;
+            resultsList.appendChild(resultElement);
+            
+            // Автоматически заполняем поле штрих-кода в форме
+            document.getElementById('product-barcode').value = barcode;
+            
+            // Показываем уведомление
+            showNotification(`Штрих-код ${barcode} отсканирован!`);
+        }
+
+        // Использование штрих-кода в форме
+        function useBarcode(barcode) {
+            document.getElementById('product-barcode').value = barcode;
+            showNotification(`Штрих-код ${barcode} добавлен в форму`);
+        }
+
+        // Очистка результатов сканирования
+        function clearScannerResults() {
+            document.getElementById('barcode-results').innerHTML = '';
+            document.getElementById('scanner-results').style.display = 'none';
+            scannedBarcodes.clear();
+            showNotification('Результаты сканирования очищены');
+        }
+
+        // ==================== ФУНКЦИИ ДЛЯ РАБОТЫ С ТОВАРАМИ ПАРТНЕРА ====================
+
+        // Загрузка товаров партнера
+        function loadPartnerProducts() {
+            const container = document.getElementById('partner-products-list');
+            container.innerHTML = '';
+            
+            if (partnerProducts.length === 0) {
+                container.innerHTML = '<p style="text-align: center; color: #666; grid-column: 1 / -1;">У вас пока нет добавленных товаров</p>';
+                return;
+            }
+            
+            partnerProducts.forEach(product => {
                 const discount = calculateDiscount(product.expiresIn);
                 const newPrice = Math.round(product.price * (1 - discount));
                 
-                L.marker([product.location.lat, product.location.lng])
-                    .addTo(map)
-                    .bindPopup(`
-                        <div style="min-width: 200px;">
-                            <img src="${product.img}" alt="${product.name}" style="width: 100%; height: 100px; object-fit: cover; border-radius: 8px;">
-                            <h3 style="margin: 10px 0 5px;">${product.name}</h3>
-                            <p style="margin: 5px 0;"><strong>${newPrice} ₸</strong> <span style="text-decoration: line-through; color: #999;">${product.price} ₸</span></p>
-                            <p style="margin: 5px 0;">${getCategoryName(product.category)}</p>
-                            <button onclick="addToCart(${product.id}); map.closePopup();" style="background: #27AE60; color: white; border: none; padding: 8px 12px; border-radius: 5px; cursor: pointer; width: 100%; margin-top: 10px;">Добавить в корзину</button>
+                container.innerHTML += `
+                    <div class="product">
+                        <img src="${product.img || 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=400'}" alt="${product.name}">
+                        <div class="category">${getCategoryName(product.category)}</div>
+                        <h3>${product.name}</h3>
+                        <div class="price">
+                            <span class="old-price">${product.price} ₸</span>
+                            ${newPrice} ₸
+                            <span class="discount-badge">-${Math.round(discount * 100)}%</span>
                         </div>
-                    `);
+                        <div class="expires">
+                            <i class="fas fa-clock"></i> Срок: ${product.expiresIn} дней
+                        </div>
+                        <div class="stock-info">В наличии: ${product.stock} шт.</div>
+                        <div style="display: flex; gap: 10px; margin-top: 10px;">
+                            <button class="btn" style="flex: 1;" onclick="editProduct(${product.id})">
+                                <i class="fas fa-edit"></i> Изменить
+                            </button>
+                            <button class="btn btn-secondary" style="flex: 1;" onclick="deleteProduct(${product.id})">
+                                <i class="fas fa-trash"></i> Удалить
+                            </button>
+                        </div>
+                    </div>
+                `;
             });
+        }
+
+        // Добавление нового товара
+        document.getElementById('add-product-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const newProduct = {
+                id: Date.now(),
+                barcode: document.getElementById('product-barcode').value,
+                name: document.getElementById('product-name').value,
+                price: parseInt(document.getElementById('product-price').value),
+                expiresIn: parseInt(document.getElementById('product-expires').value),
+                category: document.getElementById('product-category').value,
+                stock: parseInt(document.getElementById('product-stock').value),
+                img: document.getElementById('product-image').value || 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=400',
+                rating: 4.5,
+                reviews: 0,
+                isHot: true,
+                saleEnds: Date.now() + 24 * 60 * 60 * 1000,
+                weight: 0.5,
+                location: { lat: 43.238, lng: 76.882 }
+            };
+            
+            partnerProducts.push(newProduct);
+            localStorage.setItem('partnerProducts', JSON.stringify(partnerProducts));
+            
+            // Обновляем список товаров
+            loadPartnerProducts();
+            
+            // Очищаем форму
+            this.reset();
+            
+            showNotification(`Товар "${newProduct.name}" успешно добавлен!`);
+        });
+
+        // Редактирование товара
+        function editProduct(productId) {
+            const product = partnerProducts.find(p => p.id === productId);
+            if (!product) return;
+            
+            // Заполняем форму данными товара
+            document.getElementById('product-barcode').value = product.barcode || '';
+            document.getElementById('product-name').value = product.name;
+            document.getElementById('product-price').value = product.price;
+            document.getElementById('product-expires').value = product.expiresIn;
+            document.getElementById('product-category').value = product.category;
+            document.getElementById('product-stock').value = product.stock;
+            document.getElementById('product-image').value = product.img;
+            
+            // Удаляем товар для редактирования
+            deleteProduct(productId, false);
+            
+            showNotification(`Редактирование товара "${product.name}"`);
+            
+            // Прокручиваем к форме
+            document.getElementById('add-product-form').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // Удаление товара
+        function deleteProduct(productId, showNotification = true) {
+            const productIndex = partnerProducts.findIndex(p => p.id === productId);
+            if (productIndex === -1) return;
+            
+            const productName = partnerProducts[productIndex].name;
+            partnerProducts.splice(productIndex, 1);
+            localStorage.setItem('partnerProducts', JSON.stringify(partnerProducts));
+            
+            loadPartnerProducts();
+            
+            if (showNotification) {
+                showNotification(`Товар "${productName}" удален`);
+            }
+        }
+
+        // ==================== ДОПОЛНИТЕЛЬНЫЕ ФУНКЦИИ ====================
+
+        // Инициализация карты
+        function initMap() {
+            try {
+                const map = L.map('map').setView([43.238, 76.882], 12);
+                
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                    attribution: '© OpenStreetMap contributors'
+                }).addTo(map);
+                
+                // Добавляем маркеры для каждого продукта
+                products.forEach(product => {
+                    const discount = calculateDiscount(product.expiresIn);
+                    const newPrice = Math.round(product.price * (1 - discount));
+                    
+                    L.marker([product.location.lat, product.location.lng])
+                        .addTo(map)
+                        .bindPopup(`
+                            <div style="min-width: 200px;">
+                                <img src="${product.img}" alt="${product.name}" style="width: 100%; height: 100px; object-fit: cover; border-radius: 8px;">
+                                <h3 style="margin: 10px 0 5px;">${product.name}</h3>
+                                <p style="margin: 5px 0;"><strong>${newPrice} ₸</strong> <span style="text-decoration: line-through; color: #999;">${product.price} ₸</span></p>
+                                <p style="margin: 5px 0;">${getCategoryName(product.category)}</p>
+                                <button onclick="addToCartWithAnimation(${product.id}, this); map.closePopup();" style="background: #27AE60; color: white; border: none; padding: 8px 12px; border-radius: 5px; cursor: pointer; width: 100%; margin-top: 10px;">Добавить в корзину</button>
+                            </div>
+                        `);
+                });
+            } catch (error) {
+                console.error('Ошибка инициализации карты:', error);
+                document.getElementById('map').innerHTML = '<p style="text-align: center; padding: 50px;">Карта временно недоступна</p>';
+            }
         }
 
         // QR-код сайта
         function generateSiteQRCode() {
-            const siteUrl = window.location.href;
-            const qrContainer = document.getElementById('site-qrcode');
-            
-            qrContainer.innerHTML = '';
-            
-            QRCode.toCanvas(qrContainer, siteUrl, {
-                width: 150,
-                margin: 2,
-                color: {
-                    dark: '#27AE60',
-                    light: '#FFFFFF'
-                }
-            });
+            try {
+                const siteUrl = window.location.href;
+                const qrContainer = document.getElementById('site-qrcode');
+                
+                qrContainer.innerHTML = '';
+                
+                QRCode.toCanvas(qrContainer, siteUrl, {
+                    width: 150,
+                    margin: 2,
+                    color: {
+                        dark: '#27AE60',
+                        light: '#FFFFFF'
+                    }
+                });
+            } catch (error) {
+                console.error('Ошибка генерации QR-кода:', error);
+                document.getElementById('site-qrcode').innerHTML = '<p>QR-код временно недоступен</p>';
+            }
         }
 
         // Поделиться сайтом
@@ -1474,13 +2650,61 @@
             closeModal('user-modal');
         }
 
-        // Инициализация при загрузке страницы
+        // PWA функциональность
+        function showInstallPrompt() {
+            const installPrompt = document.getElementById('install-prompt');
+            installPrompt.classList.remove('hidden');
+        }
+
+        function closeInstallPrompt() {
+            const installPrompt = document.getElementById('install-prompt');
+            installPrompt.classList.add('hidden');
+        }
+
+        function installApp() {
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                deferredPrompt.userChoice.then((choiceResult) => {
+                    if (choiceResult.outcome === 'accepted') {
+                        showNotification('Приложение устанавливается...');
+                    }
+                    deferredPrompt = null;
+                });
+            }
+            closeInstallPrompt();
+        }
+
+        // Функция скрытия прелоадера
+        function hidePreloader() {
+            const preloader = document.getElementById('preloader');
+            preloader.classList.add('hidden');
+            
+            // Показываем основное содержимое
+            document.body.style.opacity = '1';
+        }
+
+        // ==================== ИНИЦИАЛИЗАЦИЯ ПРИ ЗАГРУЗКЕ ====================
+
         document.addEventListener('DOMContentLoaded', function() {
+            // Инициализируем данные
             initializeProducts();
+            initializeAchievements();
+            
+            // Рендерим контент
             renderProducts();
+            renderOrderHistory();
+            renderAchievements();
+            loadPartnerProducts();
+            
+            // Инициализируем карту и QR-код
             initMap();
-            updateCart();
             generateSiteQRCode();
+            
+            // Обновляем корзину
+            updateCart();
+            
+            // Скрываем прелоадер через 1.5 секунды (минимум)
+            setTimeout(hidePreloader, 1500);
             
             // Добавляем обработчики для фильтров
             document.querySelectorAll('.filter-btn').forEach(button => {
@@ -1503,11 +2727,32 @@
                 showNotification('✅ Заявка на партнерство отправлена! Мы свяжемся с вами в течение 24 часов.');
                 this.reset();
             });
+
+            // Добавляем обработчик для ручного ввода штрих-кода
+            document.getElementById('product-barcode').addEventListener('input', function() {
+                const barcode = this.value.trim();
+                if (barcode && !scannedBarcodes.has(barcode)) {
+                    scannedBarcodes.add(barcode);
+                }
+            });
             
             // Показываем приветственное уведомление
             setTimeout(() => {
                 showNotification('🎉 Добро пожаловать в ReFoodLoop! Спасайте еду и экономьте деньги!');
-            }, 1000);
+            }, 2000);
+            
+            // PWA: Обработчик события beforeinstallprompt
+            window.addEventListener('beforeinstallprompt', (e) => {
+                e.preventDefault();
+                deferredPrompt = e;
+                
+                // Показываем предложение установки через 10 секунд
+                setTimeout(() => {
+                    if (deferredPrompt) {
+                        showInstallPrompt();
+                    }
+                }, 10000);
+            });
         });
 
         // Закрытие модальных окон при клике вне их
